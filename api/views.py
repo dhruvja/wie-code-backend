@@ -118,6 +118,14 @@ def getDocuments(request, pk):
     return Response(documents.data)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getPersonalDocuments(request):
+    userId = request.user.id
+    docs = Document.objects.filter(user=userId).order_by("-id")
+    documents = DocumentsSerializer(docs, many=True)
+    return Response(documents.data) 
+
+@api_view(['GET'])
 def analyzeDocuments(request, pk):
     print(pk)
     docs = Document.objects.get(id=pk)
