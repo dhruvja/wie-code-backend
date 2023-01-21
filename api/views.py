@@ -4,7 +4,7 @@ from django.db.models.query import prefetch_related_objects
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
-from .models import Document
+from .models import Document, Qr
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.generics import ListAPIView
@@ -72,7 +72,9 @@ def registerUser(request):
             emergencyInfo = EmergencyContactsSerializer(data = contact)
             if emergencyInfo.is_valid():
                 emergencyInfo.save()
-        
+
+        url = "http://localhost:3000/qr/"
+        Qr.objects.create(url=f"{url}{userId}") 
     else:
         data['success'] = "User Profile not created"
 
@@ -155,6 +157,6 @@ def analyzeDocuments(request, pk):
 
 @api_view(['GET'])
 def getQR(request):
-    Qr.objects.create(url="https://google.com")
+    Qr.objects.create(url="https://google.com")    
 
     return Response("Qr is created")
