@@ -21,7 +21,7 @@ except:
     import Image
 import openai
 
-openai.api_key = "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"
+openai.api_key = "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"
 # Create your views here.
 
 
@@ -73,8 +73,9 @@ def registerUser(request):
             if emergencyInfo.is_valid():
                 emergencyInfo.save()
 
+        user = User.objects.get(id=userId)
         url = "http://localhost:3000/qr/"
-        Qr.objects.create(url=f"{url}{userId}") 
+        Qr.objects.create(url=f"{url}{userId}", user = user) 
     else:
         data['success'] = "User Profile not created"
 

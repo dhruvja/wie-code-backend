@@ -10,6 +10,6 @@ urlpatterns = [
     path('analyzedocuments/<pk>', views.analyzeDocuments, name="analyzedocuments"),
     path("updatetrack", views.updateTrack, name="updatetrack"),
     path('gettracks', views.getTracks, name="gettracks"),
-    path('getpersonaldocuments', views.getPersonaldocuments, name="getpersonaldocuments"),
+    path('getpersonaldocuments', views.getPersonalDocuments, name="getpersonaldocuments"),
     path('getqr', views.getQR, name="getqr")
 ]
