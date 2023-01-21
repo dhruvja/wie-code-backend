@@ -42,7 +42,6 @@ class EmergencyContacts(models.Model):
     user = models.ForeignKey(User, related_name = "emergency_user", on_delete=models.CASCADE)
     name = models.CharField(max_length = 255)
     phone = models.CharField(max_length = 255)
-    relation = models.CharField(max_length = 255)
 
     def __str__(self):
         return self.name

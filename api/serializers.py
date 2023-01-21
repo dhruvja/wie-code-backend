@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Document, Track
+from .models import Document, Track, UserInfo, EmergencyContacts
 from django.contrib.auth.models import User
 
 class DocumentsSerializer(serializers.ModelSerializer):
@@ -24,8 +24,26 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
         return user
 
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta: 
+        model = User
+        fields = ('id', 'username', 'email')
+
 class TrackSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Track
         fields = '__all__'
+
+class EmergencyContactsSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = EmergencyContacts 
+        fields = '__all__'
+
+class UserInfoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserInfo
+        fields = "__all__"

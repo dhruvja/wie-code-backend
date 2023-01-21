@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.db.models import Prefetch
 from django.db.models.query import prefetch_related_objects
 from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 from .models import Document
 from django.shortcuts import render
@@ -10,7 +11,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.db import connection
-from .serializers import DocumentsSerializer, RegisterSerializer, TrackSerializer
+from .serializers import DocumentsSerializer, RegisterSerializer, TrackSerializer, UserInfoSerializer, UserSerializer, EmergencyContactsSerializer
 from django.conf import settings
 import pytesseract    # ======= > Add
 from pdf2image import convert_from_path
@@ -38,13 +39,42 @@ def apiOverview(request):
 @api_view(['POST'])
 def registerUser(request):
 
-    userData = RegisterSerializer(data=request.data)
+    healthInfo = {}
+    userInfo = {}
+    emergencyContacts = []
+    print(request.data)
+    userInfo['email'] = request.data['email']
+    userInfo['password'] = request.data['password']
+    userInfo['username'] = request.data['username']
+
+    userData = RegisterSerializer(data=userInfo)
     data = {}
     if userData.is_valid():
         user = userData.save()
-        data['success'] = "success"
+        userId = User.objects.values_list('id', flat=True).get(username = user)
+        healthInfo['user'] = userId
+        healthInfo['height'] = request.data['height']
+        healthInfo['weight'] = request.data['weight']
+        healthInfo['allergies'] = request.data['allergies']
+        healthInfo['blood_group'] = request.data['blood_group']
+        healthInfo['gender'] = request.data['gender']
+        healthInfo['dob'] = request.data['dob']
+        healthData = UserInfoSerializer(data=healthInfo)
+        if healthData.is_valid():
+            health = healthData.save()
+            print(health)
+            data['success'] = "User Profile and Info created"
+        else:
+            data['success'] = "User Profile created but user info not created"
+        emergencyContacts = request.data['emergency_contacts']
+        for contact in emergencyContacts:
+            contact['user'] = userId
+            emergencyInfo = EmergencyContactsSerializer(data = contact)
+            if emergencyInfo.is_valid():
+                emergencyInfo.save()
+        
     else:
-        data['success'] = "failure"
+        data['success'] = "User Profile not created"
 
     return Response(data)
 
