@@ -24,7 +24,6 @@ class UserInfo(models.Model):
     allergies = models.TextField(blank=True)
     blood_group = models.CharField(max_length = 255)
     dob = models.CharField(max_length = 255)
-    age = models.IntegerField(default = 0)
     gender = models.CharField(max_length = 255)
 
     def __str__(self):
