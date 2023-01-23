@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-#)@%o@0mi2yd0&96%9609f3no!j#ug18cz6qev1$2(kz6lq8i-'
+SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -75,6 +76,14 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'sih.wsgi.application'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.outlook.com'
+EMAIL_PORT = '587'
+EMAIL_HOST_USER = 'wiehackathon123@hotmail.com'
+EMAIL_HOST_PASSWORD = 'Aditi123'
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
 
 
 # Database
@@ -135,8 +144,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR,'static/media/')
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=10),

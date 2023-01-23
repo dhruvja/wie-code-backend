@@ -11,5 +11,6 @@ urlpatterns = [
     path("updatetrack", views.updateTrack, name="updatetrack"),
     path('gettracks', views.getTracks, name="gettracks"),
     path('getpersonaldocuments', views.getPersonalDocuments, name="getpersonaldocuments"),
-    path('getqr', views.getQR, name="getqr")
+    path('getqr', views.getQR, name="getqr"),
+    path("sendmail/<pk>", views.sendsos, name="sendmail"),
 ]

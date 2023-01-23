@@ -4,14 +4,14 @@ from django.db.models.query import prefetch_related_objects
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
-from .models import Document, Qr
+from .models import Document, Qr, UserInfo, Track
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.db import connection
-from .serializers import DocumentsSerializer, RegisterSerializer, TrackSerializer, UserInfoSerializer, UserSerializer, EmergencyContactsSerializer
+from .serializers import DocumentsSerializer, QrSerializer, RegisterSerializer, TrackSerializer, UserInfoSerializer, UserSerializer, EmergencyContactsSerializer
 from django.conf import settings
 import pytesseract    # ======= > Add
 from pdf2image import convert_from_path
@@ -20,8 +20,9 @@ try:
 except:
     import Image
 import openai
+from django.core.mail import send_mail
 
-openai.api_key = "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"
+openai.api_key = ""
 # Create your views here.
 
 
@@ -124,15 +125,27 @@ def getDocuments(request, pk):
 @permission_classes([IsAuthenticated])
 def getPersonalDocuments(request):
     userId = request.user.id
+    qr = Qr.objects.get(id = userId)
     docs = Document.objects.filter(user=userId).order_by("-id")
+    qr = QrSerializer(qr, many=False)
+    print(qr.data)
     documents = DocumentsSerializer(docs, many=True)
-    return Response(documents.data) 
+    response = {}
+    response['documents'] = documents.data
+    response['qr'] = qr.data
+    
+    return Response(response) 
 
 @api_view(['GET'])
 def analyzeDocuments(request, pk):
     print(pk)
     docs = Document.objects.get(id=pk)
     document = DocumentsSerializer(docs, many=False)
+    userId = document.data['user']
+    print(userId)
+    healthInfo = UserInfo.objects.get(user = userId)
+    userInfo = UserInfoSerializer(healthInfo, many=False)
+    print(userInfo.data)
     path = f"static{document.data['document']}"
     print(path)
     if "pdf" in document.data['document']:
@@ -141,7 +154,7 @@ def analyzeDocuments(request, pk):
     else:
         text = pytesseract.image_to_string(Image.open(path))
     encoded_text = text.encode('ascii', 'ignore').decode('unicode_escape')
-    prompt = f"{encoded_text} . What can we infer from the given medical report above ."
+    prompt = f"What can we infer from the given medical report.{encoded_text} . This is the health data of the individual with blood group of {userInfo.data['blood_group']} of {userInfo.data['gender']} gender and of height: {userInfo.data['height']} and weight: {userInfo.data['weight']}  "
 
     # Generate text
     response = openai.Completion.create(
@@ -161,3 +174,24 @@ def getQR(request):
     Qr.objects.create(url="https://google.com")    
 
     return Response("Qr is created")
+
+@api_view(['GET'])
+def sendsos(request, pk):
+
+    usertrack = Track.objects.filter(pk=pk).order_by("-id")
+    userTrackData = TrackSerializer(usertrack, many=True)
+    latitude = userTrackData.data[0]['latitude']
+    longitude = userTrackData.data[0]['longitude']
+    username = "test"
+
+    # emergencyContacts = EmergencyContacts.objects.filter()
+
+    send_mail(
+    f'{username} in danger',
+    f'{username} is in danger. And the last scanned QR location is latitude: {latitude} and longitude {longitude}',
+    'wiehackathon123@hotmail.com',
+    ['manishsit13@gmail.com'],
+    fail_silently=False,
+)
+
+    return Response(True)
